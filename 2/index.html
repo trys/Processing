@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Corners</title>
+    <style>
+      html,
+      body {
+        margin:  0;
+        padding: 0;
+      }
+
+      canvas {
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="../processing.js"></script>
+    <canvas id="canvas" data-processing-sources="sketch.pde"></canvas>
+    <script>
+
+      var Processor = (function () {
+        "use strict";
+
+        var processing,
+            windowWidth = window.innerWidth,
+            windowHeight = window.innerHeight,
+            defaultWidth = 600,
+            defaultHeight = 400,
+            scaleX = windowWidth /  defaultWidth,
+            scaleY = windowHeight /  defaultHeight,
+            interval;
+
+        return {
+          Initialise: function () {
+            interval = window.setInterval(Processor.Load, 250);
+            
+          },
+
+          Load: function() {
+            var canvasElement = Processing.getInstanceById('canvas');
+            if ( canvasElement ) {
+              window.clearInterval(interval);
+              processing = canvasElement;
+              Processor.Loaded();
+            }
+          },
+
+          Loaded: function() {
+            processing.size(windowWidth, windowHeight);
+            var img = processing.loadImage("background.jpg");
+
+            processing.image(img, 0, 0, 600, 400 );
+
+            var histogram = [];
+            for (var i = 0; i < img.width; i++) {
+              for (var j = 0; j < img.height; j++) {
+                var bright = processing.brightness(processing.get(i, j));
+                histogram[bright] = histogram[bright] ? histogram[bright] + 1 : 1;
+              }   
+            }
+
+            var histMaxCount = 0;
+            var histMax = 0;
+            for (var i = 0; i < img.width; i++) {
+              if ( histogram[i] > histMaxCount ) {
+                histMax = i;
+                histMaxCount = histogram[i];
+              }
+            }
+            
+            processing.stroke(255);
+            for (var i = 0; i < img.width; i += 2) {
+              var which = Math.floor(processing.map(i, 0, img.width, 0, 255));
+              var y = processing.map(histogram[which], 0, histMaxCount, img.height, 0);
+              processing.line(i, img.height, i, y);
+            }
+
+          }
+
+        };
+      }());
+
+      Processor.Initialise();
+    </script>
+  </body>
+</html>
