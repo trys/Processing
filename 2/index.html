@@ -44,14 +44,21 @@
             if ( canvasElement ) {
               window.clearInterval(interval);
               processing = canvasElement;
-              Processor.Loaded();
+              processing.setup = Processor.Setup();
+              processing.draw = Processor.Draw();
+              processing.noLoop();
+              // Processor.Loaded();
             }
           },
 
-          Loaded: function() {
+          Setup: function() {
             processing.size(windowWidth, windowHeight);
-            var img = processing.loadImage("background.jpg");
+            processing.loadImage("background.jpg");
+          },
 
+          Draw: function() {
+            var img = processing.loadImage("background.jpg");
+            console.log( img );
             processing.image(img, 0, 0, 600, 400 );
 
             var histogram = [];
@@ -74,6 +81,9 @@
             processing.stroke(255);
             for (var i = 0; i < img.width; i += 2) {
               var which = Math.floor(processing.map(i, 0, img.width, 0, 255));
+              if ( histogram[which] === undefined ) {
+                histogram[which] = 0;
+              }
               var y = processing.map(histogram[which], 0, histMaxCount, img.height, 0);
               processing.line(i, img.height, i, y);
             }

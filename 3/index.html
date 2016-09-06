@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Corners</title>
+    <style>
+      html,
+      body {
+        margin:  0;
+        padding: 0;
+      }
+
+      canvas {
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="../p5.js"></script>
+    <script>
+      var Processor = (function () {
+        "use strict";
+
+        var processing,
+            windowWidth = window.innerWidth,
+            windowHeight = window.innerHeight,
+            defaultWidth = 600,
+            defaultHeight = 400,
+            scaleX = windowWidth /  defaultWidth,
+            scaleY = windowHeight /  defaultHeight;
+
+        return {
+          Setup: function() {
+            createCanvas(windowWidth, windowHeight);
+            background(9,35,54);
+            frameRate(30);
+          },
+
+          Draw: function() {
+            var x = mouseX;
+            var y = mouseY;
+            stroke('rgba(100%,100%,100%,0.3)');
+            line(x, y, Processor.scaleX(0), Processor.scaleY(0) );
+            line(x, y, Processor.scaleX(600), Processor.scaleY(400) );
+            line(x, y, Processor.scaleX(600), Processor.scaleY(0) );
+            line(x, y, Processor.scaleX(0), Processor.scaleY(400) );
+            line(x, y, Processor.scaleX(300), Processor.scaleY(0) );
+            line(x, y, Processor.scaleX(300), Processor.scaleY(400) );
+            line(x, y, Processor.scaleX(0), Processor.scaleY(200) );
+            line(x, y, Processor.scaleX(600), Processor.scaleY(200) );
+          },
+
+          scaleX: function(val) {
+            return val * scaleX;
+          },
+
+          scaleY: function(val) {
+            return val * scaleY;
+          }
+
+        };
+      }());
+
+      function setup() {
+        Processor.Setup();
+      }
+
+      function draw() {
+        Processor.Draw();
+      }
+    </script>
+  </body>
+</html>
