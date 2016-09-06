@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beat</title>
+    <style>
+      html,
+      body {
+        margin:  0;
+        padding: 0;
+      }
+
+      canvas {
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="../p5.js"></script>
+    <audio autoplay></audio>
+    <div>
+      <input name="frequency" type="range" min="10" max="10000" value="10000" />
+      <select name="type">
+        <option value="lowpass">Low Pass</option>
+        <option value="highpass">High Pass</option>
+        <option value="bandpass">Band Pass</option>
+        <option value="notch">Notch</option>
+      </select>
+    </div>
+    <script>
+      var Processor = (function () {
+        "use strict";
+
+        var processing,
+            windowWidth = window.innerWidth,
+            windowHeight = window.innerHeight,
+            defaultWidth = 600,
+            defaultHeight = 400,
+            scaleX = windowWidth /  defaultWidth,
+            scaleY = windowHeight /  defaultHeight,
+            analyser,
+            context = new AudioContext(),
+            frequencyData,
+            source,
+            filter,
+            filterElement;
+
+        return {
+          Setup: function() {
+            canvas = createCanvas(600, 400);
+            frameRate(40);
+
+            context = new AudioContext();
+            analyser = context.createAnalyser();
+            analyser.fftSize = 1024;
+            frequencyData = new Uint8Array(analyser.frequencyBinCount);
+            filter = context.createBiquadFilter();
+
+            filter.type = 'lowpass';
+            filter.frequency.value = 10000;
+
+            var audio = document.querySelector('audio');
+            audio.addEventListener('canplay', function() {
+              if ( ! source ) {
+                source = context.createMediaElementSource(this);
+
+                source.connect(filter);
+                filter.connect(analyser);
+                analyser.connect(context.destination);
+              }
+            });
+            audio.src = 'beat.mp3';
+
+            filterElement = document.querySelector('[name=frequency]');
+            filterElement.addEventListener('change', function() {
+              filter.frequency.value = this.value;
+            });
+
+            filterElement.addEventListener('input', function() {
+              filter.frequency.value = this.value;
+            });
+
+            var filterTypeElement = document.querySelector('[name=type]');
+            filterTypeElement.addEventListener('change', function() {
+              filter.type = this.value;
+            });
+          },
+          
+          Draw: function() {
+            background(50);
+            stroke(255);
+            noFill();
+
+            if ( analyser ) {
+              analyser.getByteFrequencyData(frequencyData);
+              var j = 0;
+              for (var i = 0; i < width; i += 2) {
+                var size = map(frequencyData[j], 0, 255, 0, 400);
+                line(i, 400, i, 400 - size);
+                j++;
+              }
+            }
+          },
+
+          Average: function(values) {
+            var sum = values.reduce(function(a, b) { return a + b; });
+            return sum / values.length;
+          },
+
+          scaleX: function(val) {
+            return val * scaleX;
+          },
+
+          scaleY: function(val) {
+            return val * scaleY;
+          }
+
+        };
+      }());
+
+      function setup() {
+        Processor.Setup();
+      }
+
+      function draw() {
+        Processor.Draw();
+      }
+    </script>
+  </body>
+</html>
